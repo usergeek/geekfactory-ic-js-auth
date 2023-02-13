@@ -10,7 +10,11 @@ import {AuthClientFacade} from "./AuthClientFacade";
 import {Util} from "../util";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, createActorGeneric, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "../AuthCommon";
 
-type LoginFn = (identityProviderURL: string | undefined) => Promise<LoginFnResult>
+type LoginParameters = {
+    identityProviderURL?: string
+    derivationOrigin?: string | URL
+}
+type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>
 type LogoutFn = () => void
 
 export interface Context {
@@ -58,7 +62,8 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
         _.cloneDeep(initialContextValue.state)
     )
 
-    const login: LoginFn = useCallback<LoginFn>(async (identityProviderURL: string | undefined) => {
+    const login: LoginFn = useCallback<LoginFn>(async (parameters: LoginParameters) => {
+        const {identityProviderURL, derivationOrigin} = parameters
         try {
             unstable_batchedUpdates(() => {
                 authSourceProviderContext.setSource(props.source)
@@ -66,7 +71,12 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
             })
             const authClient = await AuthClientFacade.provideAuthClient();
             if (authClient) {
-                const identity: Identity | undefined = await AuthClientFacade.login(authClient, identityProviderURL, props.source === "II" ? "II" : "NFID")
+                const identity: Identity | undefined = await AuthClientFacade.login({
+                    authClient,
+                    identityProviderURL,
+                    derivationOrigin,
+                    source: props.source === "II" ? "II" : "NFID",
+                })
                 if (identity) {
                     const accounts = await getIdentityAccounts(identity, props.source)
                     unstable_batchedUpdates(() => {

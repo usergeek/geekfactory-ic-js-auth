@@ -42,7 +42,14 @@ const restoreIdentity = async (authClient: AuthClient): Promise<Identity | undef
     await logout(authClient)
 }
 
-const login = (authClient: AuthClient, identityProviderURL: string | undefined, source: IISource): Promise<Identity | undefined> => {
+type LoginParameters = {
+    authClient: AuthClient
+    identityProviderURL: string | undefined
+    source: IISource
+    derivationOrigin?: string | URL
+}
+const login = (parameters: LoginParameters): Promise<Identity | undefined> => {
+    const {authClient, identityProviderURL, derivationOrigin, source} = parameters
     return new Promise((resolve, reject) => {
         const {width: screenWidth, height: screenHeight} = window.screen;
         let windowOpenerFeaturesParams: { left: number, top: number, width: number, height: number } = {
@@ -67,6 +74,7 @@ const login = (authClient: AuthClient, identityProviderURL: string | undefined, 
         return authClient.login({
             identityProvider: identityProviderURL,
             maxTimeToLive: BigInt(TTL),
+            derivationOrigin: derivationOrigin,
             windowOpenerFeatures: windowOpenerFeatures,
             onSuccess: async () => {
                 const identity = authClient.getIdentity();

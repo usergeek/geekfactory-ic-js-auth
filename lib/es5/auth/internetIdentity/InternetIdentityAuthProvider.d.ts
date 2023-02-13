@@ -2,7 +2,11 @@ import * as React from "react";
 import { PropsWithChildren } from "react";
 import { Source } from "../authSource/AuthSourceProvider";
 import { ContextState, ContextStatus, CreateActorFn, LoginFnResult } from "../AuthCommon";
-type LoginFn = (identityProviderURL: string | undefined) => Promise<LoginFnResult>;
+type LoginParameters = {
+    identityProviderURL?: string;
+    derivationOrigin?: string | URL;
+};
+type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>;
 type LogoutFn = () => void;
 export interface Context {
     status: ContextStatus;

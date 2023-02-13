@@ -14,7 +14,11 @@ import {useNFIDInternetIdentityAuthProviderContext} from "./nfid/NFIDAuthProvide
 import {useInfinityWalletAuthProviderContext} from "./infinityWallet/InfinityWalletAuthProvider";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "./AuthCommon";
 
-type LoginFn = (source: Source) => Promise<LoginFnResult>
+type LoginParameters = {
+    source: Source
+    derivationOrigin?: string | URL
+}
+type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>
 type LogoutFn = (source: Source) => void
 type SwitchAccountFn = (targetAccount: number) => void
 type GetCurrentPrincipalFn = () => Principal | undefined
@@ -80,16 +84,22 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
         _.cloneDeep(initialContextValue.state)
     )
 
-    const login: LoginFn = useCallback<LoginFn>(async (source: Source) => {
+    const login: LoginFn = useCallback<LoginFn>(async (parameters: LoginParameters) => {
+        const {source, derivationOrigin} = parameters
         switch (source) {
             case "Plug": {
                 return plugAuthProviderContext.login()
             }
             case "II": {
-                return internetIdentityAuthProviderContext.login(process.env.II_URL)
+                return internetIdentityAuthProviderContext.login({
+                    identityProviderURL: process.env.II_URL,
+                    derivationOrigin
+                })
             }
             case "NFID": {
-                return nfidInternetIdentityAuthProviderContext.login(process.env.NFID_II_URL)
+                return nfidInternetIdentityAuthProviderContext.login({
+                    identityProviderURL: process.env.NFID_II_URL
+                })
             }
             case "Stoic": {
                 return stoicAuthProviderContext.login()

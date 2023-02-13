@@ -2,7 +2,11 @@ import { PropsWithChildren } from "react";
 import { Principal } from "@dfinity/principal";
 import { Source } from "./authSource/AuthSourceProvider";
 import { AuthAccount, ContextState, ContextStatus, CreateActorFn, LoginFnResult } from "./AuthCommon";
-type LoginFn = (source: Source) => Promise<LoginFnResult>;
+type LoginParameters = {
+    source: Source;
+    derivationOrigin?: string | URL;
+};
+type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>;
 type LogoutFn = (source: Source) => void;
 type SwitchAccountFn = (targetAccount: number) => void;
 type GetCurrentPrincipalFn = () => Principal | undefined;
