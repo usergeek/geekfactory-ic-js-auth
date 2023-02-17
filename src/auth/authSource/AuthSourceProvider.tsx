@@ -2,7 +2,7 @@ import * as React from "react";
 import {PropsWithChildren, useCallback, useState} from "react";
 import {useCustomCompareMemo} from "use-custom-compare";
 import _ from "lodash"
-import {KeyValueStoreFacade} from "geekfactory-ic-js-util";
+import {KeyValueStoreFacade} from "geekfactory-js-util";
 
 let provideStore = (namespace: string) => {
     const keyValueStore = KeyValueStoreFacade.createStore(namespace);

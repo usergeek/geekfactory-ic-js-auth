@@ -2,7 +2,7 @@ import {Principal} from "@dfinity/principal";
 import {IDL} from "@dfinity/candid";
 import {ActorSubclass} from "@dfinity/agent";
 import {getGlobalIC} from "../AuthCommon";
-import {OneAtATimePromiseFacade} from "geekfactory-ic-js-util";
+import {OneAtATimePromiseFacade} from "geekfactory-js-util";
 
 const host = process.env.NODE_ENV === "development" ? `http://localhost:${process.env.LOCAL_REPLICA_PORT || 4943}` : undefined
 

@@ -1,5 +1,5 @@
 import {ActorSubclass} from "@dfinity/agent";
-import {OneAtATimePromiseFacade} from "geekfactory-ic-js-util";
+import {OneAtATimePromiseFacade} from "geekfactory-js-util";
 import {idlFactory as ledgerIDL} from '../../ic/nns_ledger/nns_ledger';
 import {getGlobalIC} from "../AuthCommon";
 import {IDL} from "@dfinity/candid";
