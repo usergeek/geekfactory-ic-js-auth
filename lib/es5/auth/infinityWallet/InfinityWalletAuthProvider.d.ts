@@ -12,6 +12,7 @@ interface Context {
 export declare const useInfinityWalletAuthProviderContext: () => Context;
 type Props = {
     whitelist?: Array<string>;
+    autologinTimeout?: number;
 };
 export declare const InfinityWalletAuthProvider: (props: PropsWithChildren<Props>) => JSX.Element;
 export {};

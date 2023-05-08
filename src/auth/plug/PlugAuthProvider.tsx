@@ -9,6 +9,7 @@ import {useAuthSourceProviderContext} from "../authSource/AuthSourceProvider";
 import {PlugHelper} from "./plugHelper";
 import {Util} from "../util";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "../AuthCommon";
+import {promiseWithTimeout} from "geekfactory-js-util";
 
 type LoginFn = () => Promise<LoginFnResult>
 type LogoutFn = () => void
@@ -40,6 +41,7 @@ export const usePlugAuthProviderContext = () => {
 
 type Props = {
     whitelist?: Array<string>
+    autologinTimeout?: number
 }
 
 export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
@@ -112,8 +114,9 @@ export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
             try {
                 if (authSourceProviderContext.source == "Plug") {
                     updateContextStatus({inProgress: true})
-                    console.log("Plug.autologin: will call 'await PlugHelper.getLoggedInIdentity'");
-                    const principal = await PlugHelper.getLoggedInPrincipal()
+                    const timeoutMillis: number = props.autologinTimeout == undefined ? 30000 : props.autologinTimeout;
+                    console.log(`Plug.autologin: will call 'await PlugHelper.getLoggedInPrincipal' with timeout ${timeoutMillis}ms`);
+                    const principal = await promiseWithTimeout(PlugHelper.getLoggedInPrincipal(), timeoutMillis, new Error(`PlugHelper.getLoggedInPrincipal timed out in ${timeoutMillis}ms!`))
                     console.log("Plug.autologin: got principal", principal, principal?.toText());
                     if (principal) {
                         const accounts = await getPrincipalAccounts(principal)
@@ -142,7 +145,7 @@ export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
                 })
             }
         })()
-    }, [])
+    }, [props.autologinTimeout])
 
     const value = useCustomCompareMemo<Context, [
         ContextStatus,

@@ -9,6 +9,7 @@ import {useAuthSourceProviderContext} from "../authSource/AuthSourceProvider";
 import {InfinityWalletHelper} from "./infinityWalletHelper";
 import {Util} from "../util";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "../AuthCommon";
+import {promiseWithTimeout} from "geekfactory-js-util";
 
 type LoginFn = () => Promise<LoginFnResult>
 type LogoutFn = () => void
@@ -40,6 +41,7 @@ export const useInfinityWalletAuthProviderContext = () => {
 
 type Props = {
     whitelist?: Array<string>
+    autologinTimeout?: number
 }
 
 export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
@@ -112,8 +114,9 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
             try {
                 if (authSourceProviderContext.source == "InfinityWallet") {
                     updateContextStatus({inProgress: true})
-                    console.log("InfinityWallet.autologin: will call 'await InfinityWalletHelper.getLoggedInPrincipal' with whitelist", props.whitelist);
-                    const principal = await InfinityWalletHelper.getLoggedInPrincipal(props.whitelist)
+                    const timeoutMillis: number = props.autologinTimeout == undefined ? 30000 : props.autologinTimeout;
+                    console.log(`InfinityWallet.autologin: will call 'await InfinityWalletHelper.getLoggedInPrincipal' with timeout ${timeoutMillis}ms, whitelist`, props.whitelist);
+                    const principal = await promiseWithTimeout(InfinityWalletHelper.getLoggedInPrincipal(props.whitelist), timeoutMillis, new Error(`InfinityWalletHelper.getLoggedInPrincipal timed out in ${timeoutMillis}ms!`))
                     console.log("InfinityWallet.autologin: got principal", principal, principal?.toText());
                     if (principal) {
                         const accounts = await getPrincipalAccounts(principal)
@@ -142,7 +145,7 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
                 })
             }
         })()
-    }, [])
+    }, [props.autologinTimeout])
 
     const value = useCustomCompareMemo<Context, [
         ContextStatus,

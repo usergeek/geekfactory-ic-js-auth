@@ -12,6 +12,7 @@ interface Context {
 export declare const usePlugAuthProviderContext: () => Context;
 type Props = {
     whitelist?: Array<string>;
+    autologinTimeout?: number;
 };
 export declare const PlugAuthProvider: (props: PropsWithChildren<Props>) => JSX.Element;
 export {};
