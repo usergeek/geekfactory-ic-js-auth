@@ -1,6 +1,6 @@
 {
   "name": "geekfactory-ic-js-auth",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "IC JS auth by GeekFactory",
   "main": "./lib/es5/index.js",
   "author": "GeekFactory <support@usergeek.com>",
@@ -32,9 +32,9 @@
     "@types/react-dom": "17.0.18"
   },
   "peerDependencies": {
-    "@dfinity/agent": ">=0.15.1",
-    "@dfinity/auth-client": ">=0.15.1",
-    "@dfinity/candid": ">=0.15.1",
-    "@dfinity/principal": ">=0.15.1"
+    "@dfinity/agent": "^0.15.1",
+    "@dfinity/auth-client": "^0.15.1",
+    "@dfinity/candid": "^0.15.1",
+    "@dfinity/principal": "^0.15.1"
   }
 }
