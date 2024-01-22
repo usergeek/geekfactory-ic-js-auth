@@ -2,7 +2,7 @@ import {Identity} from "@dfinity/agent";
 import {AuthClient} from "@dfinity/auth-client";
 import {IISource} from "./InternetIdentityAuthProvider";
 
-const TTL = 30 * 24 * 60 * 60 * 1_000_000_000 // 30 days in nanos
+export const TTL = 30 * 24 * 60 * 60 * 1_000_000_000 // 30 days in nanos
 
 const IDLE_TIMEOUT_MILLIS = 20 * 24 * 60 * 60 * 1000 // 20 days in millis
 
@@ -47,9 +47,10 @@ type LoginParameters = {
     identityProviderURL: string | undefined
     source: IISource
     derivationOrigin?: string | URL
+    maxTimeToLiveNanos?: bigint
 }
 const login = (parameters: LoginParameters): Promise<Identity | undefined> => {
-    const {authClient, identityProviderURL, derivationOrigin, source} = parameters
+    const {authClient, identityProviderURL, derivationOrigin, source, maxTimeToLiveNanos} = parameters
     return new Promise((resolve, reject) => {
         const {width: screenWidth, height: screenHeight} = window.screen;
         let windowOpenerFeaturesParams: { left: number, top: number, width: number, height: number } = {
@@ -73,7 +74,7 @@ const login = (parameters: LoginParameters): Promise<Identity | undefined> => {
 
         return authClient.login({
             identityProvider: identityProviderURL,
-            maxTimeToLive: BigInt(TTL),
+            maxTimeToLive: maxTimeToLiveNanos ?? BigInt(TTL),
             derivationOrigin: derivationOrigin,
             windowOpenerFeatures: windowOpenerFeatures,
             onSuccess: async () => {

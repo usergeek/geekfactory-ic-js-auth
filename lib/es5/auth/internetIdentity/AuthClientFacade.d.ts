@@ -1,11 +1,13 @@
 import { Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { IISource } from "./InternetIdentityAuthProvider";
+export declare const TTL: number;
 type LoginParameters = {
     authClient: AuthClient;
     identityProviderURL: string | undefined;
     source: IISource;
     derivationOrigin?: string | URL;
+    maxTimeToLiveNanos?: bigint;
 };
 export declare const AuthClientFacade: {
     provideAuthClient: () => Promise<AuthClient | undefined>;

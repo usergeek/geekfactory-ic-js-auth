@@ -2,7 +2,7 @@ export * from "./auth/AuthCommon";
 export * from "./auth/authSource/AuthSourceProvider";
 export * from "./auth/AuthProvider"
 import {InternetIdentityAuthProvider, InternetIdentityAuthProviderContext, useInternetIdentityAuthProviderContext} from "./auth/internetIdentity/InternetIdentityAuthProvider";
-import {NFIDInternetIdentityAuthProviderContext, useNFIDInternetIdentityAuthProviderContext} from "./auth/nfid/NFIDAuthProvider";
+import {NFIDAuthProviderContext, useNFIDAuthProviderContext} from "./auth/nfid/NFIDAuthProvider";
 import {PlugAuthProvider, usePlugAuthProviderContext} from "./auth/plug/PlugAuthProvider";
 import {StoicAuthProvider, useStoicAuthProviderContext} from "./auth/stoic/StoicAuthProvider";
 import {InfinityWalletAuthProvider, useInfinityWalletAuthProviderContext} from "./auth/infinityWallet/InfinityWalletAuthProvider";
@@ -13,8 +13,8 @@ export {
     InternetIdentityAuthProvider,
     useInternetIdentityAuthProviderContext,
     InternetIdentityAuthProviderContext,
-    useNFIDInternetIdentityAuthProviderContext,
-    NFIDInternetIdentityAuthProviderContext,
+    useNFIDAuthProviderContext,
+    NFIDAuthProviderContext,
     PlugAuthProvider,
     usePlugAuthProviderContext,
     StoicAuthProvider,

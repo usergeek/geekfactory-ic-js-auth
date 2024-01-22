@@ -10,13 +10,14 @@ import {usePlugAuthProviderContext} from "./plug/PlugAuthProvider";
 import {Source, useAuthSourceProviderContext} from "./authSource/AuthSourceProvider";
 import {useInternetIdentityAuthProviderContext} from "./internetIdentity/InternetIdentityAuthProvider";
 import {useStoicAuthProviderContext} from "./stoic/StoicAuthProvider";
-import {useNFIDInternetIdentityAuthProviderContext} from "./nfid/NFIDAuthProvider";
+import {useNFIDAuthProviderContext} from "./nfid/NFIDAuthProvider";
 import {useInfinityWalletAuthProviderContext} from "./infinityWallet/InfinityWalletAuthProvider";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "./AuthCommon";
 
 type LoginParameters = {
     source: Source
     derivationOrigin?: string | URL
+    maxTimeToLiveNanos?: bigint
 }
 type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>
 type LogoutFn = (source: Source) => void
@@ -67,7 +68,7 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
     const plugAuthProviderContext = usePlugAuthProviderContext();
     const stoicAuthProviderContext = useStoicAuthProviderContext()
     const internetIdentityAuthProviderContext = useInternetIdentityAuthProviderContext();
-    const nfidInternetIdentityAuthProviderContext = useNFIDInternetIdentityAuthProviderContext();
+    const nfidInternetIdentityAuthProviderContext = useNFIDAuthProviderContext();
     const infinityWalletAuthProviderContext = useInfinityWalletAuthProviderContext();
 
     const [contextSource, setContextSource] = useState<Source>(() => {
@@ -85,20 +86,21 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
     )
 
     const login: LoginFn = useCallback<LoginFn>(async (parameters: LoginParameters) => {
-        const {source, derivationOrigin} = parameters
+        const {source, derivationOrigin, maxTimeToLiveNanos} = parameters
         switch (source) {
             case "Plug": {
                 return plugAuthProviderContext.login()
             }
             case "II": {
                 return internetIdentityAuthProviderContext.login({
-                    identityProviderURL: process.env.II_URL,
-                    derivationOrigin
+                    derivationOrigin,
+                    maxTimeToLiveNanos
                 })
             }
             case "NFID": {
                 return nfidInternetIdentityAuthProviderContext.login({
-                    identityProviderURL: process.env.NFID_II_URL
+                    derivationOrigin,
+                    maxTimeToLiveNanos
                 })
             }
             case "Stoic": {

@@ -5,6 +5,7 @@ import { AuthAccount, ContextState, ContextStatus, CreateActorFn, LoginFnResult 
 type LoginParameters = {
     source: Source;
     derivationOrigin?: string | URL;
+    maxTimeToLiveNanos?: bigint;
 };
 type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>;
 type LogoutFn = (source: Source) => void;
