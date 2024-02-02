@@ -31,10 +31,10 @@
     "@types/react-dom": "17.0.18"
   },
   "peerDependencies": {
-    "@dfinity/agent": ">=0.15.1",
-    "@dfinity/auth-client": ">=0.15.1",
-    "@dfinity/candid": ">=0.15.1",
-    "@dfinity/principal": ">=0.15.1",
+    "@dfinity/agent": "^0.19.3",
+    "@dfinity/auth-client": "^0.19.3",
+    "@dfinity/candid": "^0.19.3",
+    "@dfinity/principal": "^0.19.3",
     "@nfid/embed": "0.10.0-alpha.10",
     "ic-stoic-identity": ">=2.0.0"
   }
