@@ -1,3 +1,4 @@
+import * as React from "react";
 import { PropsWithChildren } from "react";
 import { ContextState, ContextStatus, CreateActorFn, LoginFnResult } from "../AuthCommon";
 type LoginFn = () => Promise<LoginFnResult>;
@@ -11,5 +12,5 @@ interface Context {
 }
 export declare const useStoicAuthProviderContext: () => Context;
 type Props = {};
-export declare const StoicAuthProvider: (props: PropsWithChildren<Props>) => JSX.Element;
+export declare const StoicAuthProvider: (props: PropsWithChildren<Props>) => React.JSX.Element;
 export {};

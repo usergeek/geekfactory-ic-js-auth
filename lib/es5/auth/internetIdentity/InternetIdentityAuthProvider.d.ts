@@ -21,5 +21,5 @@ export type IISource = Extract<Source, "II" | "NFID">;
 type Props = {
     identityProviderURL?: string;
 };
-export declare const InternetIdentityAuthProvider: (props: PropsWithChildren<Props>) => JSX.Element;
+export declare const InternetIdentityAuthProvider: (props: PropsWithChildren<Props>) => React.JSX.Element;
 export {};

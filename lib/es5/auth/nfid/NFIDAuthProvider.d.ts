@@ -23,5 +23,5 @@ type Props = {
 /**
  * @see https://docs.nfid.one/integration/quickstart
  */
-export declare const NFIDAuthProvider: (props: PropsWithChildren<Props>) => JSX.Element;
+export declare const NFIDAuthProvider: (props: PropsWithChildren<Props>) => React.JSX.Element;
 export {};

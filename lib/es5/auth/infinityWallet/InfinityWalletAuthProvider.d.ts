@@ -1,3 +1,4 @@
+import * as React from "react";
 import { PropsWithChildren } from "react";
 import { ContextState, ContextStatus, CreateActorFn, LoginFnResult } from "../AuthCommon";
 type LoginFn = () => Promise<LoginFnResult>;
@@ -14,5 +15,5 @@ type Props = {
     whitelist?: Array<string>;
     autologinTimeout?: number;
 };
-export declare const InfinityWalletAuthProvider: (props: PropsWithChildren<Props>) => JSX.Element;
+export declare const InfinityWalletAuthProvider: (props: PropsWithChildren<Props>) => React.JSX.Element;
 export {};

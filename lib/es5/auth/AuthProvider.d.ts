@@ -1,3 +1,4 @@
+import * as React from "react";
 import { PropsWithChildren } from "react";
 import { Principal } from "@dfinity/principal";
 import { Source } from "./authSource/AuthSourceProvider";
@@ -27,5 +28,5 @@ export declare const useAuthProviderContext: () => Context;
 type Props = {
     onLogout?: () => void;
 };
-export declare const AuthProvider: (props: PropsWithChildren<Props>) => JSX.Element;
+export declare const AuthProvider: (props: PropsWithChildren<Props>) => React.JSX.Element;
 export {};
