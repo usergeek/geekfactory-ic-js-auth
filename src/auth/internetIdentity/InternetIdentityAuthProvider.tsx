@@ -54,11 +54,15 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
     const authSourceProviderContext = useAuthSourceProviderContext();
 
     const [authClient, setAuthClient] = useState<AuthClient | null>(null);
+
+    const createAuthClient = useCallback(async () => {
+        const authClient = await AuthClientFacade.provideAuthClient();
+        setAuthClient(authClient);
+    }, []);
+
     useEffect(() => {
-        (async () => {
-            const authClient = await AuthClientFacade.provideAuthClient();
-            setAuthClient(authClient);
-        })()
+        // noinspection JSIgnoredPromiseFromCall
+        createAuthClient();
     }, []);
 
     const [contextStatus, updateContextStatus] = useReducer<Reducer<ContextStatus, Partial<ContextStatus>>>(
@@ -113,10 +117,10 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
     }, [source, props.identityProviderURL, authClient])
 
     const logout: LogoutFn = useCallback<LogoutFn>(async () => {
-        const authClient = await AuthClientFacade.provideAuthClient();
         try {
             if (authClient) {
                 await AuthClientFacade.logout(authClient)
+                await createAuthClient();
             }
             unstable_batchedUpdates(() => {
                 authSourceProviderContext.setSource(undefined)
@@ -132,7 +136,7 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
             })
         }
 
-    }, [])
+    }, [authClient])
 
     const createActor: CreateActorFn = useCustomCompareCallback(async function <T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions) {
         const createActorResult = await createActorGeneric<T>(canisterId, idlFactory, options);
