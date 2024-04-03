@@ -1,8 +1,15 @@
 import {Principal} from "@dfinity/principal";
 import {IDL} from "@dfinity/candid";
-import {ActorSubclass} from "@dfinity/agent";
+import {ActorSubclass, HttpAgent} from "@dfinity/agent";
 import {getGlobalIC} from "../AuthCommon";
 import {OneAtATimePromiseFacade} from "geekfactory-js-util";
+
+/*
+import {PlugMobileProvider} from '@funded-labs/plug-mobile-sdk'
+const isMobile = PlugMobileProvider.isMobileBrowser()
+console.error("Plug: PlugMobileProvider isMobile", isMobile);
+*/
+
 
 const host = process.env.NODE_ENV === "development" ? `http://localhost:${process.env.LOCAL_REPLICA_PORT || 4943}` : undefined
 
@@ -31,8 +38,49 @@ const Helper = {
         }
     },
 
-    login: async (whitelist: Array<string> | undefined = undefined): Promise<Principal | undefined> => {
+    login: async (whitelist: Array<string> | undefined = undefined): Promise<{
+        principal: Principal | undefined
+        agent: HttpAgent | undefined
+    } | undefined> => {
         try {
+            /*if (isMobile) {
+                const options = {
+                    debug: true, // If you want to see debug logs in console
+                    walletConnectProjectId: process.env.PLUG_WALLET_CONNECT_PROJECT_ID, // Project ID from WalletConnect console
+                    window: window,
+                };
+                console.log("Plug: PlugMobileProvider create with options", options);
+                const provider = new PlugMobileProvider(options)
+
+                try {
+                    await provider.initialize()
+                } catch (e) {
+                    console.error("Plug: PlugMobileProvider initialize failed", e);
+                    // noinspection ExceptionCaughtLocallyJS
+                    throw e
+                }
+
+                if (!provider.isPaired()) {
+                    try {
+                        const result = await provider.pair()
+                        console.log("Plug: PlugMobileProvider pair result", result);
+                    } catch (e) {
+                        console.error("Plug: PlugMobileProvider pair failed", e);
+                        // noinspection ExceptionCaughtLocallyJS
+                        throw e
+                    }
+                }
+
+                const agent = await provider.createAgent({
+                    host: 'https://ic0.app',
+                    targets: whitelist ?? [],
+                })
+
+                return {
+                    principal: await agent.getPrincipal(),
+                    agent: agent
+                }
+            }*/
             const wallet = getGlobalWallet()
             if (wallet) {
                 const result = await walletOneAtATimePromise.oneAtATimePromise(() => wallet.requestConnect({
@@ -41,7 +89,10 @@ const Helper = {
                     timeout: 10000,
                 }), "plug_login");
                 if (result) {
-                    return await Helper.getPrincipal()
+                    return {
+                        principal: await Helper.getPrincipal(),
+                        agent: undefined
+                    }
                 }
             }
         } catch (e) {
@@ -58,7 +109,15 @@ const Helper = {
         return undefined
     },
 
-    createActor: async <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory): Promise<ActorSubclass<T> | undefined> => {
+    createActor: async <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory/*, agent?: HttpAgent*/): Promise<ActorSubclass<T> | undefined> => {
+        /*if (agent != undefined) {
+            try {
+                return createActorGeneric<T>(canisterId, interfaceFactory, {}, agent)
+            } catch (e) {
+                console.error("Plug: createActor using agent failed", {canisterId, interfaceFactory, agent}, e);
+                return undefined
+            }
+        }*/
         const parameters = {
             canisterId: canisterId,
             interfaceFactory: interfaceFactory
@@ -99,7 +158,7 @@ const Helper = {
         }
     },
 
-    requestTransfer: async (to: string, amountE8S: number): Promise<{height: number}> => {
+    requestTransfer: async (to: string, amountE8S: number): Promise<{ height: number }> => {
         try {
             const wallet = getGlobalWallet()
             if (wallet) {

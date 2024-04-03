@@ -9,7 +9,7 @@ type LoginParameters = {
     maxTimeToLiveNanos?: bigint;
 };
 type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>;
-type LogoutFn = (source: Source) => void;
+type LogoutFn = (source: Source) => Promise<void>;
 type SwitchAccountFn = (targetAccount: number) => void;
 type GetCurrentPrincipalFn = () => Principal | undefined;
 type GetCurrentAccountFn = () => AuthAccount | undefined;

@@ -12,7 +12,7 @@ import {AuthAccount, ContextState, ContextStatus, CreateActorFn, CreateActorOpti
 import {promiseWithTimeout} from "geekfactory-js-util";
 
 type LoginFn = () => Promise<LoginFnResult>
-type LogoutFn = () => void
+type LogoutFn = () => Promise<void>
 
 interface Context {
     status: ContextStatus
@@ -92,8 +92,8 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
     }, [props.whitelist], _.isEqual)
 
     const logout: LogoutFn = useCallback<LogoutFn>(async () => {
+        await InfinityWalletHelper.logout()
         unstable_batchedUpdates(() => {
-            InfinityWalletHelper.logout()
             authSourceProviderContext.setSource(undefined)
             updateContextStatus({isLoggedIn: false})
             updateContextState({principal: undefined, accounts: []})

@@ -6,6 +6,7 @@ import {NFIDAuthProviderContext, useNFIDAuthProviderContext} from "./auth/nfid/N
 import {PlugAuthProvider, usePlugAuthProviderContext} from "./auth/plug/PlugAuthProvider";
 import {StoicAuthProvider, useStoicAuthProviderContext} from "./auth/stoic/StoicAuthProvider";
 import {InfinityWalletAuthProvider, useInfinityWalletAuthProviderContext} from "./auth/infinityWallet/InfinityWalletAuthProvider";
+
 export {PlugHelper} from "./auth/plug/plugHelper"
 export {InfinityWalletHelper} from "./auth/infinityWallet/infinityWalletHelper"
 

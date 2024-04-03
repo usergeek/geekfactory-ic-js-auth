@@ -1,4 +1,4 @@
-import { ActorConfig, ActorSubclass, HttpAgentOptions, Identity } from "@dfinity/agent";
+import { ActorConfig, ActorSubclass, HttpAgent, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { IDL } from "@dfinity/candid";
 export declare const getGlobalIC: () => any;
@@ -13,6 +13,7 @@ export type ContextStatus = {
 };
 export type ContextState = {
     identity: Identity | undefined;
+    agent: HttpAgent | undefined;
     principal: Principal | undefined;
     accounts: Array<AuthAccount>;
     currentAccount: number | undefined;
@@ -30,4 +31,4 @@ export type CreateActorOptions = {
     actorOptions?: ActorConfig;
 };
 export type CreateActorFn = <T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions) => Promise<ActorSubclass<T> | undefined>;
-export declare function createActorGeneric<T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions): ActorSubclass<T>;
+export declare function createActorGeneric<T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions, agent_?: HttpAgent): ActorSubclass<T>;

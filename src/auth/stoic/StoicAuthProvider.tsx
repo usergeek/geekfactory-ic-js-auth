@@ -9,7 +9,7 @@ import {useAuthSourceProviderContext} from "../authSource/AuthSourceProvider";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, createActorGeneric, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "../AuthCommon";
 
 type LoginFn = () => Promise<LoginFnResult>
-type LogoutFn = () => void
+type LogoutFn = () => Promise<void>
 
 interface Context {
     status: ContextStatus

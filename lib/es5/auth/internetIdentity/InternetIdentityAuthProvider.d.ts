@@ -7,7 +7,7 @@ type LoginParameters = {
     maxTimeToLiveNanos?: bigint;
 };
 type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>;
-type LogoutFn = () => void;
+type LogoutFn = () => Promise<void>;
 export interface Context {
     status: ContextStatus;
     state: ContextState;

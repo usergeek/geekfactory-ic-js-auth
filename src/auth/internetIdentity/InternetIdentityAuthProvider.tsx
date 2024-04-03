@@ -1,5 +1,5 @@
 import * as React from "react";
-import {PropsWithChildren, Reducer, useCallback, useEffect, useReducer} from "react";
+import {PropsWithChildren, Reducer, useCallback, useEffect, useReducer, useState} from "react";
 import {unstable_batchedUpdates} from "react-dom";
 import {Identity} from "@dfinity/agent";
 import {IDL} from "@dfinity/candid";
@@ -9,13 +9,14 @@ import {Source, useAuthSourceProviderContext} from "../authSource/AuthSourceProv
 import {AuthClientFacade} from "./AuthClientFacade";
 import {Util} from "../util";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, createActorGeneric, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "../AuthCommon";
+import {AuthClient} from "@dfinity/auth-client";
 
 type LoginParameters = {
     derivationOrigin?: string | URL
     maxTimeToLiveNanos?: bigint
 }
 type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>
-type LogoutFn = () => void
+type LogoutFn = () => Promise<void>
 
 export interface Context {
     status: ContextStatus
@@ -52,6 +53,14 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
 
     const authSourceProviderContext = useAuthSourceProviderContext();
 
+    const [authClient, setAuthClient] = useState<AuthClient | null>(null);
+    useEffect(() => {
+        (async () => {
+            const authClient = await AuthClientFacade.provideAuthClient();
+            setAuthClient(authClient);
+        })()
+    }, []);
+
     const [contextStatus, updateContextStatus] = useReducer<Reducer<ContextStatus, Partial<ContextStatus>>>(
         (state, newState) => ({...state, ...newState}),
         _.cloneDeep(initialContextValue.status)
@@ -69,7 +78,6 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
                 authSourceProviderContext.setSource(source)
                 updateContextStatus({inProgress: true})
             })
-            const authClient = await AuthClientFacade.provideAuthClient();
             if (authClient) {
                 const identity: Identity | undefined = await AuthClientFacade.login({
                     authClient,
@@ -79,7 +87,7 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
                     maxTimeToLiveNanos: maxTimeToLiveNanos
                 })
                 if (identity) {
-                    const accounts = await getIdentityAccounts(identity)
+                    const accounts = getIdentityAccounts(identity)
                     unstable_batchedUpdates(() => {
                         updateContextStatus({isLoggedIn: true, inProgress: false})
                         updateContextState({identity: identity, principal: identity.getPrincipal(), accounts: accounts})
@@ -102,7 +110,7 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
             })
             return {status: "error", error: typeof e === "string" ? new Error(e) : e}
         }
-    }, [source, props.identityProviderURL])
+    }, [source, props.identityProviderURL, authClient])
 
     const logout: LogoutFn = useCallback<LogoutFn>(async () => {
         const authClient = await AuthClientFacade.provideAuthClient();
@@ -196,7 +204,7 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
     </InternetIdentityAuthProviderContext.Provider>
 }
 
-const getIdentityAccounts = async (identity: Identity): Promise<Array<AuthAccount>> => {
+const getIdentityAccounts = (identity: Identity): Array<AuthAccount> => {
     try {
         return [{
             name: "Internet Identity",

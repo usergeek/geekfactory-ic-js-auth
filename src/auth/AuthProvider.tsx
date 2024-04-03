@@ -20,7 +20,7 @@ type LoginParameters = {
     maxTimeToLiveNanos?: bigint
 }
 type LoginFn = (parameters: LoginParameters) => Promise<LoginFnResult>
-type LogoutFn = (source: Source) => void
+type LogoutFn = (source: Source) => Promise<void>
 type SwitchAccountFn = (targetAccount: number) => void
 type GetCurrentPrincipalFn = () => Principal | undefined
 type GetCurrentAccountFn = () => AuthAccount | undefined
@@ -115,7 +115,7 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
         nfidInternetIdentityAuthProviderContext.login, stoicAuthProviderContext.login,
         infinityWalletAuthProviderContext.login])
 
-    const logout: LogoutFn = useCallback<LogoutFn>(async (source: Source) => {
+    const logout: LogoutFn = useCallback<LogoutFn>(async (source: Source): Promise<void> => {
         switch (source) {
             case "Plug": {
                 await plugAuthProviderContext.logout()
@@ -205,6 +205,7 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
                 status = plugAuthProviderContext.status
                 state = {
                     identity: plugAuthProviderContext.state.identity,
+                    agent: plugAuthProviderContext.state.agent,
                     principal: plugAuthProviderContext.state.principal,
                     accounts: plugAuthProviderContext.state.accounts,
                     currentAccount: 0,
@@ -215,6 +216,7 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
                 status = internetIdentityAuthProviderContext.status
                 state = {
                     identity: internetIdentityAuthProviderContext.state.identity,
+                    agent: undefined,
                     principal: internetIdentityAuthProviderContext.state.principal,
                     accounts: internetIdentityAuthProviderContext.state.accounts,
                     currentAccount: 0,
@@ -225,6 +227,7 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
                 status = nfidInternetIdentityAuthProviderContext.status
                 state = {
                     identity: nfidInternetIdentityAuthProviderContext.state.identity,
+                    agent: undefined,
                     principal: nfidInternetIdentityAuthProviderContext.state.principal,
                     accounts: nfidInternetIdentityAuthProviderContext.state.accounts,
                     currentAccount: 0,
@@ -235,6 +238,7 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
                 status = stoicAuthProviderContext.status
                 state = {
                     identity: stoicAuthProviderContext.state.identity,
+                    agent: undefined,
                     principal: stoicAuthProviderContext.state.principal,
                     accounts: stoicAuthProviderContext.state.accounts,
                     currentAccount: 0,
@@ -245,6 +249,7 @@ export const AuthProvider = (props: PropsWithChildren<Props>) => {
                 status = infinityWalletAuthProviderContext.status
                 state = {
                     identity: infinityWalletAuthProviderContext.state.identity,
+                    agent: undefined,
                     principal: infinityWalletAuthProviderContext.state.principal,
                     accounts: infinityWalletAuthProviderContext.state.accounts,
                     currentAccount: 0,

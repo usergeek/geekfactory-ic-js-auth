@@ -6,7 +6,7 @@ export declare const InfinityWalletHelper: {
     getLoggedInPrincipal: (whitelist?: Array<string> | undefined) => Promise<Principal | undefined>;
     login: (whitelist?: Array<string> | undefined) => Promise<Principal | undefined>;
     getPrincipal: () => Promise<Principal | undefined>;
-    createActor: <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory) => Promise<ActorSubclass<T>>;
+    createActor: <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory) => Promise<ActorSubclass<T> | undefined>;
     logout: () => Promise<void>;
     requestTransfer: (to: string, amountE8S: bigint) => Promise<any>;
 };

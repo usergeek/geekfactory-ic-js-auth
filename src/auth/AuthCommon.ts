@@ -18,6 +18,7 @@ export type ContextStatus = {
 }
 export type ContextState = {
     identity: Identity | undefined
+    agent: HttpAgent | undefined
     principal: Principal | undefined
     accounts: Array<AuthAccount>
     currentAccount: number | undefined
@@ -34,6 +35,7 @@ export function getInitialContextStatus(): ContextStatus {
 export function getInitialContextState(): ContextState {
     return _.cloneDeep({
         identity: undefined,
+        agent: undefined,
         principal: undefined,
         accounts: [],
         currentAccount: undefined,
@@ -45,8 +47,8 @@ export type LoginFnResult = { status: "success" } | { status: "error", error: Er
 export type CreateActorOptions = { agentOptions?: HttpAgentOptions; actorOptions?: ActorConfig }
 export type CreateActorFn = <T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions) => Promise<ActorSubclass<T> | undefined>
 
-export function createActorGeneric<T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions): ActorSubclass<T> {
-    const agent = new HttpAgent({...options?.agentOptions});
+export function createActorGeneric<T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions, agent_?: HttpAgent): ActorSubclass<T> {
+    const agent = agent_ ?? new HttpAgent({...options?.agentOptions});
 
     // Fetch root key for certificate validation during development
     if (process.env.NODE_ENV !== "production") {

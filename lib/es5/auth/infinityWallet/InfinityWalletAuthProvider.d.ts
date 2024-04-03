@@ -2,7 +2,7 @@ import * as React from "react";
 import { PropsWithChildren } from "react";
 import { ContextState, ContextStatus, CreateActorFn, LoginFnResult } from "../AuthCommon";
 type LoginFn = () => Promise<LoginFnResult>;
-type LogoutFn = () => void;
+type LogoutFn = () => Promise<void>;
 interface Context {
     status: ContextStatus;
     state: ContextState;

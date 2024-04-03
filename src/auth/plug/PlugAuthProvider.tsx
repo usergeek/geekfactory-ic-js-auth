@@ -12,7 +12,7 @@ import {AuthAccount, ContextState, ContextStatus, CreateActorFn, CreateActorOpti
 import {promiseWithTimeout} from "geekfactory-js-util";
 
 type LoginFn = () => Promise<LoginFnResult>
-type LogoutFn = () => void
+type LogoutFn = () => Promise<void>
 
 interface Context {
     status: ContextStatus
@@ -64,20 +64,21 @@ export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
                 updateContextStatus({inProgress: true})
             })
             console.log("Plug.login: will call 'await PlugHelper.login' with whitelist", props.whitelist);
-            const principal = await PlugHelper.login(props.whitelist)
+            const loginResult: { principal: Principal | undefined/*, agent: HttpAgent | undefined*/ } | undefined = await PlugHelper.login(props.whitelist);
+            const {principal/*, agent*/} = loginResult || {}
             console.log("Plug.login: got principal", principal, principal?.toText());
-            if (principal) {
+            if (principal != undefined/* && agent != undefined*/) {
                 const accounts = await getPrincipalAccounts(principal)
                 unstable_batchedUpdates(() => {
                     updateContextStatus({isLoggedIn: true, inProgress: false})
-                    updateContextState({principal: principal, accounts: accounts})
+                    updateContextState({agent: undefined/*agent*/, principal: principal, accounts: accounts})
                 })
                 return {status: "success"}
             }
             unstable_batchedUpdates(() => {
                 authSourceProviderContext.setSource(undefined)
                 updateContextStatus({isLoggedIn: false, inProgress: false})
-                updateContextState({principal: undefined, accounts: []})
+                updateContextState({agent: undefined, principal: undefined, accounts: []})
             })
             return {status: "error", error: new Error("unknownError")}
         } catch (e) {
@@ -85,29 +86,29 @@ export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
             unstable_batchedUpdates(() => {
                 authSourceProviderContext.setSource(undefined)
                 updateContextStatus({isLoggedIn: false, inProgress: false})
-                updateContextState({principal: undefined, accounts: []})
+                updateContextState({agent: undefined, principal: undefined, accounts: []})
             })
             return {status: "error", error: typeof e === "string" ? new Error(e) : e}
         }
     }, [props.whitelist], _.isEqual)
 
     const logout: LogoutFn = useCallback<LogoutFn>(async () => {
+        await PlugHelper.logout()
         unstable_batchedUpdates(() => {
-            PlugHelper.logout()
             authSourceProviderContext.setSource(undefined)
             updateContextStatus({isLoggedIn: false})
-            updateContextState({principal: undefined, accounts: []})
+            updateContextState({agent: undefined, principal: undefined, accounts: []})
         })
     }, [])
 
     const createActor: CreateActorFn = useCustomCompareCallback(async function <T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions) {
-        console.log("PlugAuthProvider: start with", {canisterId, idlFactory, options});
-        const createActorResult = await PlugHelper.createActor<T>(canisterId, idlFactory);
+        console.log("PlugAuthProvider: start with", {canisterId, idlFactory, options/*, agent: contextState.agent*/});
+        const createActorResult = await PlugHelper.createActor<T>(canisterId, idlFactory/*, contextState.agent*/);
         console.log("PlugAuthProvider: createActorResult", createActorResult);
         if (createActorResult != undefined) {
             return createActorResult
         }
-    }, [], _.isEqual)
+    }, [contextState.agent], _.isEqual)
 
     useEffect(() => {
         (async () => {
@@ -122,7 +123,7 @@ export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
                         const accounts = await getPrincipalAccounts(principal)
                         unstable_batchedUpdates(() => {
                             updateContextStatus({isReady: true, isLoggedIn: true, inProgress: false})
-                            updateContextState({principal: principal, accounts: accounts})
+                            updateContextState({agent: undefined, principal: principal, accounts: accounts})
                         })
                         return
                     }
@@ -132,7 +133,7 @@ export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
                         authSourceProviderContext.setSource(undefined)
                     }
                     updateContextStatus({isReady: true, isLoggedIn: false, inProgress: false})
-                    updateContextState({principal: undefined, accounts: []})
+                    updateContextState({agent: undefined, principal: undefined, accounts: []})
                 })
             } catch (e) {
                 console.error("PlugAuthProvider: useEffect[]: caught error", authSourceProviderContext.source, e);
@@ -141,7 +142,7 @@ export const PlugAuthProvider = (props: PropsWithChildren<Props>) => {
                         authSourceProviderContext.setSource(undefined)
                     }
                     updateContextStatus({isReady: true, isLoggedIn: false, inProgress: false})
-                    updateContextState({principal: undefined, accounts: []})
+                    updateContextState({agent: undefined, principal: undefined, accounts: []})
                 })
             }
         })()
