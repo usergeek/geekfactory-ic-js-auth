@@ -1,6 +1,6 @@
 {
   "name": "geekfactory-ic-js-auth",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "IC JS auth by GeekFactory",
   "main": "./lib/es5/index.js",
   "author": "GeekFactory <support@usergeek.com>",
