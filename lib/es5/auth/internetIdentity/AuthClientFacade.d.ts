@@ -9,7 +9,8 @@ type LoginParameters = {
     maxTimeToLiveNanos?: bigint;
 };
 export declare const AuthClientFacade: {
-    provideAuthClient: () => Promise<AuthClient | undefined>;
+    getAuthClient: () => AuthClient | undefined;
+    createAuthClient: () => Promise<AuthClient | undefined>;
     restoreIdentity: (authClient: AuthClient) => Promise<Identity | undefined>;
     login: (parameters: LoginParameters) => Promise<Identity | undefined>;
     logout: (authClient: AuthClient, options?: {

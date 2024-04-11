@@ -6,7 +6,10 @@ const IDLE_TIMEOUT_MILLIS = 20 * 24 * 60 * 60 * 1000 // 20 days in millis
 
 let authClientInstance: AuthClient | undefined = undefined
 
-const provideAuthClient = async (): Promise<AuthClient | undefined> => {
+const getAuthClient = (): AuthClient | undefined => {
+    return authClientInstance
+}
+const createAuthClient = async (): Promise<AuthClient | undefined> => {
     if (!authClientInstance) {
         const authClient = await AuthClient.create({
                 idleOptions: {
@@ -32,7 +35,7 @@ const destroyAuthClient = () => {
 const restoreIdentity = async (authClient: AuthClient): Promise<Identity | undefined> => {
     const isAuthenticated = await authClient.isAuthenticated();
     if (isAuthenticated) {
-        const identity = await authClient.getIdentity();
+        const identity = authClient.getIdentity();
         if (!identity.getPrincipal().isAnonymous()) {
             return identity
         }
@@ -84,6 +87,7 @@ const login = (parameters: LoginParameters): Promise<Identity | undefined> => {
                 }
             },
             onError: error => {
+                console.error("AuthClientFacade: authClient.login(...) caught error", error);
                 reject(error)
             }
         })
@@ -96,7 +100,8 @@ const logout = async (authClient: AuthClient, options?: { returnTo?: string; }) 
 }
 
 export const AuthClientFacade = {
-    provideAuthClient: provideAuthClient,
+    getAuthClient: getAuthClient,
+    createAuthClient: createAuthClient,
     restoreIdentity: restoreIdentity,
     login: login,
     logout: logout,

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {PropsWithChildren, Reducer, useCallback, useEffect, useReducer, useState} from "react";
+import {PropsWithChildren, Reducer, useCallback, useEffect, useReducer} from "react";
 import {unstable_batchedUpdates} from "react-dom";
 import {Identity} from "@dfinity/agent";
 import {IDL} from "@dfinity/candid";
@@ -9,7 +9,6 @@ import {Source, useAuthSourceProviderContext} from "../authSource/AuthSourceProv
 import {AuthClientFacade} from "./AuthClientFacade";
 import {Util} from "../util";
 import {AuthAccount, ContextState, ContextStatus, CreateActorFn, createActorGeneric, CreateActorOptions, getInitialContextState, getInitialContextStatus, LoginFnResult} from "../AuthCommon";
-import {AuthClient} from "@dfinity/auth-client";
 
 type LoginParameters = {
     derivationOrigin?: string | URL
@@ -50,19 +49,11 @@ type Props = {
     identityProviderURL?: string
 }
 export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) => {
-
     const authSourceProviderContext = useAuthSourceProviderContext();
-
-    const [authClient, setAuthClient] = useState<AuthClient | null>(null);
-
-    const createAuthClient = useCallback(async () => {
-        const authClient = await AuthClientFacade.provideAuthClient();
-        setAuthClient(authClient);
-    }, []);
 
     useEffect(() => {
         // noinspection JSIgnoredPromiseFromCall
-        createAuthClient();
+        AuthClientFacade.createAuthClient()
     }, []);
 
     const [contextStatus, updateContextStatus] = useReducer<Reducer<ContextStatus, Partial<ContextStatus>>>(
@@ -82,6 +73,11 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
                 authSourceProviderContext.setSource(source)
                 updateContextStatus({inProgress: true})
             })
+            let authClient = AuthClientFacade.getAuthClient();
+            if (authClient == undefined) {
+                console.warn("InternetIdentityAuthProvider.login: still no authClient - will call 'await AuthClientFacade.createAuthClient()'");
+                authClient = await AuthClientFacade.createAuthClient();
+            }
             if (authClient) {
                 const identity: Identity | undefined = await AuthClientFacade.login({
                     authClient,
@@ -114,13 +110,14 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
             })
             return {status: "error", error: typeof e === "string" ? new Error(e) : e}
         }
-    }, [source, props.identityProviderURL, authClient])
+    }, [source, props.identityProviderURL])
 
     const logout: LogoutFn = useCallback<LogoutFn>(async () => {
         try {
+            const authClient = AuthClientFacade.getAuthClient();
             if (authClient) {
                 await AuthClientFacade.logout(authClient)
-                await createAuthClient();
+                await AuthClientFacade.createAuthClient();
             }
             unstable_batchedUpdates(() => {
                 authSourceProviderContext.setSource(undefined)
@@ -136,10 +133,10 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
             })
         }
 
-    }, [authClient])
+    }, [])
 
     const createActor: CreateActorFn = useCustomCompareCallback(async function <T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions) {
-        const createActorResult = await createActorGeneric<T>(canisterId, idlFactory, options);
+        const createActorResult = createActorGeneric<T>(canisterId, idlFactory, options);
         if (createActorResult != undefined) {
             return createActorResult
         }
@@ -150,7 +147,7 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
             try {
                 if (authSourceProviderContext.source == source) {
                     updateContextStatus({inProgress: true})
-                    const authClient = await AuthClientFacade.provideAuthClient();
+                    const authClient = await AuthClientFacade.createAuthClient();
                     if (authClient) {
                         const identity = await AuthClientFacade.restoreIdentity(authClient)
                         if (identity) {
@@ -192,9 +189,9 @@ export const InternetIdentityAuthProvider = (props: PropsWithChildren<Props>) =>
     ]>(() => ({
         status: contextStatus,
         state: contextState,
-        login: login,
-        logout: logout,
-        createActor: createActor,
+        login,
+        logout,
+        createActor,
     }), [
         contextStatus,
         contextState,

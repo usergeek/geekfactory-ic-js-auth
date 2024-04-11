@@ -1,5 +1,5 @@
 import * as React from "react";
-import {PropsWithChildren, Reducer, useCallback, useReducer, useState} from "react";
+import {PropsWithChildren, Reducer, useCallback, useEffect, useReducer, useState} from "react";
 import {unstable_batchedUpdates} from "react-dom";
 import {ActorSubclass} from "@dfinity/agent";
 import {IDL} from '@dfinity/candid';
