@@ -42,6 +42,7 @@ export const useInfinityWalletAuthProviderContext = () => {
 type Props = {
     whitelist?: Array<string>
     autologinTimeout?: number
+    host?: string
 }
 
 export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
@@ -57,14 +58,14 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
         _.cloneDeep(initialContextValue.state)
     )
 
-    const login: LoginFn = useCustomCompareCallback<LoginFn, [Array<string> | undefined]>(async () => {
+    const login: LoginFn = useCustomCompareCallback<LoginFn, [Array<string> | undefined, string | undefined]>(async () => {
         try {
             unstable_batchedUpdates(() => {
                 authSourceProviderContext.setSource("InfinityWallet")
                 updateContextStatus({inProgress: true})
             })
             console.log("InfinityWallet.login: will call 'await InfinityWalletHelper.login' with whitelist", props.whitelist);
-            const principal = await InfinityWalletHelper.login(props.whitelist)
+            const principal = await InfinityWalletHelper.login(props.whitelist, props.host)
             console.log("InfinityWallet.login: got principal", principal, principal?.toText());
             if (principal) {
                 const accounts = await getPrincipalAccounts(principal)
@@ -89,7 +90,7 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
             })
             return {status: "error", error: typeof e === "string" ? new Error(e) : e}
         }
-    }, [props.whitelist], _.isEqual)
+    }, [props.whitelist, props.host], _.isEqual)
 
     const logout: LogoutFn = useCallback<LogoutFn>(async () => {
         await InfinityWalletHelper.logout()
@@ -102,7 +103,7 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
 
     const createActor: CreateActorFn = useCustomCompareCallback(async function <T>(canisterId: string, idlFactory: IDL.InterfaceFactory, options?: CreateActorOptions) {
         console.log("InfinityWalletAuthProvider: start with", {canisterId, idlFactory, options});
-        const createActorResult = await InfinityWalletHelper.createActor<T>(canisterId, idlFactory);
+        const createActorResult = await InfinityWalletHelper.createActor<T>(canisterId, idlFactory, options?.agentOptions?.host);
         console.log("InfinityWalletAuthProvider: createActorResult", createActorResult);
         if (createActorResult != undefined) {
             return createActorResult
@@ -115,8 +116,8 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
                 if (authSourceProviderContext.source == "InfinityWallet") {
                     updateContextStatus({inProgress: true})
                     const timeoutMillis: number = props.autologinTimeout == undefined ? 30000 : props.autologinTimeout;
-                    console.log(`InfinityWallet.autologin: will call 'await InfinityWalletHelper.getLoggedInPrincipal' with timeout ${timeoutMillis}ms, whitelist`, props.whitelist);
-                    const principal = await promiseWithTimeout(InfinityWalletHelper.getLoggedInPrincipal(props.whitelist), timeoutMillis, new Error(`InfinityWalletHelper.getLoggedInPrincipal timed out in ${timeoutMillis}ms!`))
+                    console.log(`InfinityWallet.autologin: will call 'await InfinityWalletHelper.getLoggedInPrincipal' with timeout ${timeoutMillis}ms, whitelist`, {whitelist: props.whitelist, host: props.host});
+                    const principal = await promiseWithTimeout(InfinityWalletHelper.getLoggedInPrincipal(props.whitelist, props.host), timeoutMillis, new Error(`InfinityWalletHelper.getLoggedInPrincipal timed out in ${timeoutMillis}ms!`))
                     console.log("InfinityWallet.autologin: got principal", principal, principal?.toText());
                     if (principal) {
                         const accounts = await getPrincipalAccounts(principal)
@@ -145,7 +146,7 @@ export const InfinityWalletAuthProvider = (props: PropsWithChildren<Props>) => {
                 })
             }
         })()
-    }, [props.autologinTimeout])
+    }, [props.autologinTimeout, props.host])
 
     const value = useCustomCompareMemo<Context, [
         ContextStatus,

@@ -3,10 +3,10 @@ import { IDL } from "@dfinity/candid";
 import { Principal } from "@dfinity/principal";
 export declare const InfinityWalletHelper: {
     isAvailable: () => boolean;
-    getLoggedInPrincipal: (whitelist?: Array<string> | undefined) => Promise<Principal | undefined>;
-    login: (whitelist?: Array<string> | undefined) => Promise<Principal | undefined>;
+    getLoggedInPrincipal: (whitelist?: Array<string> | undefined, host?: string) => Promise<Principal | undefined>;
+    login: (whitelist?: Array<string> | undefined, host?: string) => Promise<Principal | undefined>;
     getPrincipal: () => Promise<Principal | undefined>;
-    createActor: <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory) => Promise<ActorSubclass<T> | undefined>;
+    createActor: <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory, host?: string) => Promise<ActorSubclass<T> | undefined>;
     logout: () => Promise<void>;
     requestTransfer: (to: string, amountE8S: bigint) => Promise<any>;
 };

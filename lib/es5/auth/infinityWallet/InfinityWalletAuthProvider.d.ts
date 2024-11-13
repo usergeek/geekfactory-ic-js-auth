@@ -14,6 +14,7 @@ export declare const useInfinityWalletAuthProviderContext: () => Context;
 type Props = {
     whitelist?: Array<string>;
     autologinTimeout?: number;
+    host?: string;
 };
 export declare const InfinityWalletAuthProvider: (props: PropsWithChildren<Props>) => React.JSX.Element;
 export {};

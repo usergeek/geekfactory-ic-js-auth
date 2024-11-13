@@ -5,7 +5,7 @@ import {getGlobalIC} from "../AuthCommon";
 import {IDL} from "@dfinity/candid";
 import {Principal} from "@dfinity/principal";
 
-const host = process.env.NODE_ENV === "development" ? `http://localhost:${process.env.LOCAL_REPLICA_PORT || 4943}` : undefined
+const defaultHost = process.env.NODE_ENV === "development" ? `http://localhost:${process.env.LOCAL_REPLICA_PORT || 4943}` : undefined
 
 const walletOneAtATimePromise = OneAtATimePromiseFacade.create()
 
@@ -23,14 +23,14 @@ const Helper = {
         }
     },
 
-    getLoggedInPrincipal: async (whitelist: Array<string> | undefined = undefined): Promise<Principal | undefined> => {
+    getLoggedInPrincipal: async (whitelist: Array<string> | undefined = undefined, host?: string): Promise<Principal | undefined> => {
         try {
             const wallet = getGlobalWallet()
             if (wallet) {
                 const connected = await wallet.isConnected()
                 if (!connected || !wallet.agent) {
                     await wallet.requestConnect({
-                        host: host,
+                        host: host ?? defaultHost,
                         whitelist: whitelist,
                     });
                 }
@@ -41,12 +41,12 @@ const Helper = {
         }
     },
 
-    login: async (whitelist: Array<string> | undefined = undefined): Promise<Principal | undefined> => {
+    login: async (whitelist: Array<string> | undefined = undefined, host?: string): Promise<Principal | undefined> => {
         try {
             const wallet = getGlobalWallet()
             if (wallet) {
                 await wallet.requestConnect({
-                    host: host,
+                    host: host ?? defaultHost,
                     whitelist: whitelist,
                 });
                 return await Helper.getPrincipal()
@@ -65,11 +65,11 @@ const Helper = {
         return undefined
     },
 
-    createActor: async <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory): Promise<ActorSubclass<T> | undefined> => {
+    createActor: async <T>(canisterId: string, interfaceFactory: IDL.InterfaceFactory, host?: string): Promise<ActorSubclass<T> | undefined> => {
         const parameters = {
             canisterId: canisterId,
             interfaceFactory: interfaceFactory,
-            host: host,
+            host: host ?? defaultHost,
         }
         try {
             const wallet = getGlobalWallet()
